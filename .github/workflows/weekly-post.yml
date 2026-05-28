@@ -1,0 +1,56 @@
+name: Weekly LinkedIn post
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays 08:00 UTC. Adjust to your timezone if needed.
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Restore brain agent state
+        uses: actions/cache@v4
+        with:
+          path: brain_agent_state.json
+          key: brain-agent-state-${{ github.run_id }}
+          restore-keys: |
+            brain-agent-state-
+
+      - name: Run agent
+        env:
+          AZURE_OPENAI_API_KEY:        ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT:       ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_VERSION:    ${{ secrets.AZURE_OPENAI_API_VERSION }}
+          AZURE_OPENAI_DEPLOYMENT_GPT4O: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_GPT4O }}
+          GITHUB_TOKEN:                ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO:                 ${{ github.repository }}
+          BRAIN_PATH:                  .brain
+          STATE_FILE:                  brain_agent_state.json
+          LOOKBACK_DAYS:               "7"
+        run: python run_agent.py
+
+      - name: Save brain agent state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: brain_agent_state.json
+          key: brain-agent-state-${{ github.run_id }}

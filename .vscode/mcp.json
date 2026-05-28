@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "brain-linkedin-agent": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "agent_mcp.server"],
+      "env": {
+        "BRAIN_PATH": "${workspaceFolder}/.brain",
+        "STATE_FILE": "${workspaceFolder}/brain_agent_state.json",
+        "GITHUB_REPOSITORY": "ThirtyNimrod/post-for-me-please"
+      }
+    }
+  }
+}
