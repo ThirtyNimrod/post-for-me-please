@@ -19,7 +19,10 @@ def _headers() -> dict:
 
 
 def search_repos(query: str, min_stars: int = 50) -> str:
-    """Return up to 5 GitHub repos matching `query` with at least `min_stars` stars."""
+    """Return up to 5 GitHub repos matching query with at least min_stars stars.
+
+    Returns an empty string if no results. Returns an error string on failure.
+    """
     q = f"{query} stars:>={min_stars}"
     try:
         r = requests.get(
@@ -32,25 +35,29 @@ def search_repos(query: str, min_stars: int = 50) -> str:
         items = r.json().get("items", [])
     except Exception as e:
         return f"(github search failed: {e})"
+
     if not items:
         return ""
+
     lines: list[str] = []
     for i, it in enumerate(items, 1):
         name = it.get("full_name")
         stars = it.get("stargazers_count", 0)
         desc = (it.get("description") or "").strip()
         url = it.get("html_url")
-        lines.append(f"{i}. {name} — {stars} stars\n   {desc}\n   {url}")
+        lines.append(f"{i}. {name} — {stars:,} stars\n   {desc}\n   {url}")
+
     return "\n\n".join(lines)
 
 
 def create_issue(title: str, body: str) -> str:
-    """Open an issue on `GITHUB_REPOSITORY`. Returns the issue HTML URL."""
+    """Open an issue on GITHUB_REPOSITORY. Returns the issue HTML URL."""
     repo = os.environ.get("GITHUB_REPOSITORY")
     if not repo:
         raise RuntimeError("GITHUB_REPOSITORY env var is not set")
     if not os.environ.get("GITHUB_TOKEN"):
         raise RuntimeError("GITHUB_TOKEN env var is not set")
+
     r = requests.post(
         f"{API}/repos/{repo}/issues",
         json={"title": title, "body": body},
@@ -59,3 +66,10 @@ def create_issue(title: str, body: str) -> str:
     )
     r.raise_for_status()
     return r.json().get("html_url", "")
+
+
+if __name__ == "__main__":
+    import sys
+
+    q = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "LangGraph"
+    print(search_repos(q))

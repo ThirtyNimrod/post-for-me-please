@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "post-for-me-please"
+version = "0.1.0"
+description = "Reference-first LinkedIn post agent (LangGraph + Streamlit)."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "langgraph>=0.3.0",
+  "litellm>=1.40.0",
+  "streamlit>=1.35.0",
+  "requests>=2.31.0",
+  "python-slugify>=8.0.0",
+  "python-dotenv>=1.0.0",
+  "typing-extensions>=4.9.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app", "app.*", "ui", "ui.*"]

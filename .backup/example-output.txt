@@ -1,0 +1,77 @@
+# 70% faster SQL, 140k hours saved
+
+Option A:
+
+Most people think Text-to-SQL is a “nice demo” until it breaks on real schemas. Here’s what actually happens when you measure it like an engineering project.
+
+Uber reported that natural-language-to-SQL cut query authoring time by 70%, saving ~140,000 hours per month at their scale. That’s not vibes. That’s labor hours.
+
+The interesting part isn’t “LLMs can write SQL.” It’s how you make the SQL consistent with your tables, metrics, and joins when the user’s question is vague or uses internal terminology.
+
+Today’s models are stronger than when that system was built, but the hard part is still grounding. Long prompts can stuff in conventions and examples, but they get brittle as the schema evolves. RAG can pull the right table/metric context, but retrieval mistakes are silent failures.
+
+If you’ve shipped Text-to-SQL internally, what ended up being the real bottleneck: retrieval quality, metric definitions, or query validation?
+
+Option B:
+
+The way to think about Text-to-SQL is: you’re not generating SQL, you’re generating “SQL that matches your company’s meaning.”
+
+Uber reported natural-language-to-SQL cut query authoring time by 70%, saving ~140,000 hours per month. That only happens when the system reliably maps words like “active,” “completed,” or “conversion” to the exact definitions analysts argue about.
+
+This is why the architecture debate matters. A long prompt is like handing a new analyst a thick wiki and hoping they remember it. RAG is like giving them a librarian who fetches the relevant pages for each question.
+
+With 200k context windows, long prompts get more tempting, but they don’t solve freshness. Schemas change, metric logic changes, and the prompt becomes a stale snapshot. RAG can stay current, but only if your retrieval is disciplined and your sources are authoritative.
+
+How are you grounding Text-to-SQL today: static context, retrieval, or a hybrid?
+
+Option C:
+
+You have two options when building Text-to-SQL: stuff everything into the prompt, or retrieve the right context per question.
+
+Uber reported natural-language-to-SQL cut query authoring time by 70%, saving ~140,000 hours per month. That kind of ROI usually requires more than “a bigger model.” It requires repeatable correctness.
+
+Long-prompt systems are simpler to ship. They work well when the schema is small, the metrics are stable, and you can curate a tight set of examples.
+
+RAG systems are harder, but they scale better with entropy: lots of tables, lots of teams, lots of definitions. The failure mode shifts from “model forgot” to “retriever fetched the wrong thing,” which you can test and monitor.
+
+With context windows pushing 200k, the decision isn’t dead—it just moves. Bigger prompts reduce how often you need retrieval, but they don’t remove the need for up-to-date definitions.
+
+Where have you landed, and what made you choose it?
+
+# Column pruning to beat token limits
+
+Option A:
+
+Most people think bigger context windows mean you can just paste the whole schema and move on. Here’s what actually happens.
+
+Even after you pick the right tables, enterprise schemas can have hundreds of columns. If you describe every column “just in case,” you burn tokens on things the query will never touch, and you still increase the chance the model grabs the wrong field.
+
+Uber’s approach in QueryGPT was to add a Column Prune Agent: a first LLM call that filters the columns down to what’s likely relevant, before the SQL generator sees anything.
+
+What I take from that today: long prompts and 200k contexts don’t remove the need for selection. They just make it easier to be sloppy. RAG can help retrieve the right tables and docs, but you still need a “schema diet” step so the generator isn’t choosing from a buffet.
+
+If you’re building text-to-SQL, are you pruning columns explicitly, or trusting the model to ignore what it doesn’t need?
+
+Option B:
+
+The way to think about column pruning is: you’re not “giving the model more context,” you’re giving it more choices.
+
+A big schema is like handing a new teammate every internal wiki page and asking for a one-line answer. They’ll spend time reading irrelevant stuff and still might quote the wrong section.
+
+Uber’s QueryGPT handled this by inserting a Column Prune Agent before SQL generation. It’s an LLM call whose job is to remove columns unlikely to matter for the user question, so the next step sees a smaller, cleaner schema.
+
+This is why I’m skeptical of “just use a longer prompt” as context windows grow. Long context can reduce retrieval pain, but it doesn’t reduce ambiguity. In text-to-SQL, ambiguity often lives at the column level: similar names, overlapping meanings, and fields that look plausible.
+
+How are you deciding which schema details to show the model before it writes SQL?
+
+Option C:
+
+You have two options when generating SQL from natural language: feed the model everything, or make it choose from a curated subset.
+
+The “everything” approach feels safer, especially with large context windows. But in practice, enterprise schemas can have hundreds of columns, and describing them all can hit token limits and increase wrong-field selection.
+
+Uber’s QueryGPT took the curated route with a Column Prune Agent: an LLM step that filters out unlikely columns before the SQL generation step.
+
+The decision point today is interesting. RAG helps you fetch the right tables and column descriptions on demand. Long prompts let you brute-force more context. But neither guarantees the generator won’t pick a plausible-but-wrong column unless you constrain the candidate set.
+
+If you’ve tried both, when did RAG beat long prompts for text-to-SQL, and when did it not matter?
