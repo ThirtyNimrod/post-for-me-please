@@ -52,7 +52,6 @@ Set `GITHUB_TOKEN` in your shell (or in `.vscode/mcp.json` env) so
 | `search_hackernews`           | Top 3 HN stories for a query within a time window.                          |
 | `fetch_langgraph_changelog`   | Latest LangGraph GitHub releases — version, date, headline notes.           |
 | `fetch_page`                  | Generic URL fetch with HTML stripped, truncated to a char budget.           |
-| `search_github_repos`         | GitHub repo search with a minimum-stars filter.                             |
 | `search_arxiv`                | arXiv search (use only for research-paper-shaped concepts).                 |
 | `create_github_issue`         | Open an issue on `GITHUB_REPOSITORY`; marks the surfaced brain files as processed. |
 

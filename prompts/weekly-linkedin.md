@@ -13,7 +13,6 @@ Follow these steps in order:
    - Always call `search_hackernews` with the concept name
    - Always call `fetch_langgraph_changelog` (once total, not per topic)
    - Call `fetch_page` with the relevant LangGraph docs URL if one is obvious
-   - Call `search_github_repos` with the main concept tag
    - Only call `search_arxiv` if the topic maps to a research concept like
      ReAct, chain-of-thought, RAG, or similar
 

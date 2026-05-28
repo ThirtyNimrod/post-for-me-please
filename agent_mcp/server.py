@@ -64,16 +64,6 @@ def fetch_page(url: str, max_chars: int = 3000) -> str:
 
 
 @mcp.tool()
-def search_github_repos(query: str, min_stars: int = 50) -> str:
-    """Search GitHub for repositories related to a concept or pattern.
-
-    Returns repo name, star count, description, and URL.
-    Filters out repos below min_stars to reduce noise.
-    """
-    return github.search_repos(query, min_stars=min_stars)
-
-
-@mcp.tool()
 def search_arxiv(query: str) -> str:
     """Search arXiv for papers related to an AI/ML concept.
 
